@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'RegisterPage.dart';
 import 'MyHomePage.dart';
+import 'package:wave/config.dart';
+import 'package:wave/wave.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key, required this.title}) : super(key: key);
@@ -49,7 +51,8 @@ class _LoginPageState extends State<LoginPage> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => const MyHomePage(title: 'WishList'),
+            builder: (context) =>
+                MyHomePage(title: 'WishList', authToken: data['access token']),
           ),
         );
       } else {
@@ -80,54 +83,95 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.secondary,
+        backgroundColor: Colors.blue, // Color del AppBar
         title: Text(widget.title),
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              TextField(
-                controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Correo electrónico',
-                ),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _passwordController,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Contraseña',
-                ),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  final String email = _emailController.text;
-                  final String password = _passwordController.text;
-                  if (email.isEmpty || password.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text('Por favor complete todos los campos.'),
-                      duration: Duration(seconds: 2),
-                    ));
-                  } else {
-                    login(email, password);
-                  }
-                },
-                child: const Text('Iniciar Sesión'),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton.icon(
-                onPressed: _navigateToRegisterPage,
-                icon: const Icon(Icons.person_add),
-                label: const Text('Registrarse'),
-              ),
-            ],
+      body: Stack(
+        children: [
+          WaveWidget(
+            config: CustomConfig(
+              gradients: [
+                [Colors.blue, Colors.blue.shade200],
+                [Colors.blue.shade200, Colors.blue.shade100],
+              ],
+              durations: [19440, 10800],
+              heightPercentages: [0.35, 0.36],
+              gradientBegin: Alignment.bottomLeft,
+              gradientEnd: Alignment.topRight,
+            ),
+            waveAmplitude: 0,
+            size: const Size(double.infinity, double.infinity),
           ),
-        ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextField(
+                  controller: _emailController,
+                  decoration: const InputDecoration(
+                    labelText: 'Correo electrónico',
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Contraseña',
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    final String email = _emailController.text;
+                    final String password = _passwordController.text;
+                    if (email.isEmpty || password.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        content: Text('Por favor complete todos los campos.'),
+                        duration: Duration(seconds: 2),
+                      ));
+                    } else {
+                      login(email, password);
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    'Iniciar Sesión',
+                    style: TextStyle(color: Colors.blue),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton.icon(
+                  onPressed: _navigateToRegisterPage,
+                  icon: const Icon(Icons.person_add),
+                  label: const Text('Registrarse'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -4,6 +4,8 @@ import 'package:logger/logger.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:proyecto/LoginPage.dart';
+import 'package:wave/config.dart';
+import 'package:wave/wave.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({Key? key, required this.title}) : super(key: key);
@@ -91,82 +93,168 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.secondary,
-        title: Text(widget.title),
+        title: const Text("Registro"),
+        backgroundColor: Colors.blue, // Color del AppBar
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              TextField(
-                controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Nombre',
-                ),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _surnameController,
-                decoration: const InputDecoration(
-                  labelText: 'Apellido',
-                ),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Correo electrónico',
-                ),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _phoneController,
-                decoration: const InputDecoration(
-                  labelText: 'Teléfono',
-                ),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _passwordController,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Contraseña',
-                ),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _getImage,
-                child: const Text('Seleccionar imagen'),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  final String name = _nameController.text;
-                  final String surname = _surnameController.text;
-                  final String email = _emailController.text;
-                  final String phone = _phoneController.text;
-                  final String password = _passwordController.text;
-                  if (name.isEmpty ||
-                      surname.isEmpty ||
-                      email.isEmpty ||
-                      phone.isEmpty ||
-                      password.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Por favor complete todos los campos.'),
-                      ),
-                    );
-                  } else {
-                    register(name, surname, email, phone, password);
-                  }
-                },
-                child: const Text('Registrar'),
-              ),
-            ],
+      body: Stack(
+        children: [
+          WaveWidget(
+            config: CustomConfig(
+              gradients: [
+                [Colors.blue, Colors.blue.shade200],
+                [Colors.blue.shade200, Colors.blue.shade100],
+              ],
+              durations: [19440, 10800],
+              heightPercentages: [0.35, 0.36],
+              gradientBegin: Alignment.bottomLeft,
+              gradientEnd: Alignment.topRight,
+            ),
+            waveAmplitude: 0,
+            size: const Size(double.infinity, double.infinity),
           ),
-        ),
+          SingleChildScrollView(
+            padding: EdgeInsets.only(
+                top:
+                    MediaQuery.of(context).padding.top + 0.25 * kToolbarHeight),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 1),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    'Registro',
+                    style: TextStyle(
+                      fontSize: 32,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(
+                      height: 15), // Reducción del espacio entre elementos
+                  TextField(
+                    controller: _nameController,
+                    decoration: InputDecoration(
+                      labelText: 'Nombre',
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(
+                      height: 15), // Reducción del espacio entre elementos
+                  TextField(
+                    controller: _surnameController,
+                    decoration: InputDecoration(
+                      labelText: 'Apellido',
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(
+                      height: 15), // Reducción del espacio entre elementos
+                  TextField(
+                    controller: _emailController,
+                    decoration: InputDecoration(
+                      labelText: 'Correo electrónico',
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(
+                      height: 15), // Reducción del espacio entre elementos
+                  TextField(
+                    controller: _phoneController,
+                    decoration: InputDecoration(
+                      labelText: 'Teléfono',
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(
+                      height: 15), // Reducción del espacio entre elementos
+                  TextField(
+                    controller: _passwordController,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      labelText: 'Contraseña',
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(
+                      height: 15), // Reducción del espacio entre elementos
+                  ElevatedButton(
+                    onPressed: _getImage,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text(
+                      'Seleccionar imagen',
+                      style: TextStyle(color: Colors.blue),
+                    ),
+                  ),
+                  const SizedBox(
+                      height: 15), // Reducción del espacio entre elementos
+                  ElevatedButton(
+                    onPressed: () {
+                      final String name = _nameController.text;
+                      final String surname = _surnameController.text;
+                      final String email = _emailController.text;
+                      final String phone = _phoneController.text;
+                      final String password = _passwordController.text;
+                      if (name.isEmpty ||
+                          surname.isEmpty ||
+                          email.isEmpty ||
+                          phone.isEmpty ||
+                          password.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content:
+                                Text('Por favor complete todos los campos.'),
+                          ),
+                        );
+                      } else {
+                        register(name, surname, email, phone, password);
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text(
+                      'Registrar',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  const SizedBox(
+                      height: 15), // Reducción del espacio entre elementos
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
