@@ -1,56 +1,18 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
 
-class Gift {
-  final int id;
-  final String name;
-  final String description;
-  final String url;
-  final double price;
-  final String image;
-  final int categoryId;
-  final int userId;
-  final int shopId;
+class UserGiftPage extends StatefulWidget {
+  final String authToken;
 
-  Gift({
-    required this.id,
-    required this.name,
-    required this.description,
-    required this.url,
-    required this.price,
-    required this.image,
-    required this.categoryId,
-    required this.userId,
-    required this.shopId,
-  });
-
-  factory Gift.fromJson(Map<String, dynamic> json) {
-    return Gift(
-      id: json['id'],
-      name: json['name'],
-      description: json['description'],
-      url: json['url'],
-      price: double.parse(json['price'].toString()),
-      image: json['image'],
-      categoryId: json['category_id'],
-      userId: json['user_id'],
-      shopId: json['shop_id'],
-    );
-  }
-}
-
-class GiftsPage extends StatefulWidget {
-  final int userId;
-
-  const GiftsPage({Key? key, required this.userId}) : super(key: key);
+  const UserGiftPage({Key? key, required this.authToken}) : super(key: key);
 
   @override
-  GiftsPageState createState() => GiftsPageState();
+  UserGiftPageState createState() => UserGiftPageState();
 }
 
-class GiftsPageState extends State<GiftsPage> {
+class UserGiftPageState extends State<UserGiftPage> {
   late Future<List<Gift>> _giftsFuture;
   Gift? _selectedGift;
 
@@ -60,14 +22,35 @@ class GiftsPageState extends State<GiftsPage> {
     _giftsFuture = _fetchGifts();
   }
 
-  Future<List<Gift>> _fetchGifts() async {
+  Future<int> getUserId() async {
     final response = await http.get(
-        Uri.parse('http://127.0.0.1:8000/api/Gifts/?user_id=${widget.userId}'));
+      Uri.parse('http://127.0.0.1:8000/api/userprofile'),
+      headers: {
+        'Authorization': 'Bearer ${widget.authToken}',
+      },
+    );
+    if (response.statusCode == 200) {
+      final userData = jsonDecode(response.body);
+      return userData['id'];
+    } else {
+      throw Exception('Failed to get user id');
+    }
+  }
+
+  Future<List<Gift>> _fetchGifts() async {
+    final userId = await getUserId();
+    final response = await http.get(
+      Uri.parse('http://127.0.0.1:8000/api/Gifts?user_id=$userId'),
+      headers: {
+        'Authorization': 'Bearer ${widget.authToken}',
+      },
+    );
     if (response.statusCode == 200) {
       final List<dynamic> jsonData = jsonDecode(response.body);
       return jsonData.map((json) => Gift.fromJson(json)).toList();
     } else {
-      throw Exception('Failed to load gifts');
+      throw Exception(
+          'Failed to load gifts. Status code: ${response.statusCode}');
     }
   }
 
@@ -75,8 +58,7 @@ class GiftsPageState extends State<GiftsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.secondary,
-        title: Text(_selectedGift != null ? _selectedGift!.name : 'Gifts'),
+        title: Text(_selectedGift != null ? _selectedGift!.name : 'User Gifts'),
       ),
       body: _selectedGift != null ? _buildGiftDetails() : _buildGiftsList(),
     );
@@ -189,5 +171,34 @@ class GiftsPageState extends State<GiftsPage> {
     } else {
       throw 'Could not launch $url';
     }
+  }
+}
+
+class Gift {
+  final int id;
+  final String name;
+  final String description;
+  final String url;
+  final double price;
+  final String image;
+
+  Gift({
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.url,
+    required this.price,
+    required this.image,
+  });
+
+  factory Gift.fromJson(Map<String, dynamic> json) {
+    return Gift(
+      id: json['id'],
+      name: json['name'],
+      description: json['description'],
+      url: json['url'],
+      price: double.parse(json['price'].toString()),
+      image: json['image'],
+    );
   }
 }

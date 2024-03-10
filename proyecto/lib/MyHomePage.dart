@@ -4,6 +4,7 @@ import 'package:animated_card/animated_card.dart';
 import 'package:http/http.dart' as http;
 import 'FriendPage.dart';
 import 'ProfilePage.dart';
+import 'UserGiftPage.dart';
 
 class MyHomePage extends StatefulWidget {
   final String title;
@@ -159,7 +160,14 @@ class _MyHomePageState extends State<MyHomePage> {
                         OptionCard(
                           title: 'Mis deseos',
                           onTap: () {
-                            // Implementa la lógica para Mis deseos
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => UserGiftPage(
+                                  authToken: widget.authToken,
+                                ),
+                              ),
+                            );
                           },
                         ),
                         OptionCard(

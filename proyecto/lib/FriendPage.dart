@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'GiftsPage.dart'; // Importa el archivo gift_page.dart donde se define la página GiftPage
 
 class FriendPage extends StatelessWidget {
   final int userId; // Suponiendo que el ID es un entero
@@ -53,6 +54,7 @@ class FriendPage extends StatelessWidget {
                 const SizedBox(height: 20),
                 _buildTextField("", phoneController),
                 // Continúa agregando otros campos según sea necesario
+                _buildButton(context), // Agrega el botón aquí
               ],
             ),
           ),
@@ -80,6 +82,24 @@ class FriendPage extends StatelessWidget {
           ),
         ),
         enabled: false, // Cambiar a true si quieres que sea editable.
+      ),
+    );
+  }
+
+  Widget _buildButton(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 20.0),
+      child: ElevatedButton(
+        onPressed: () {
+          // Navegar a la página GiftPage cuando se presiona el botón
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => GiftsPage(userId: userId),
+            ),
+          );
+        },
+        child: const Text('Ver sus deseos'),
       ),
     );
   }
