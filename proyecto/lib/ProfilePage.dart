@@ -87,6 +87,9 @@ class UsersPageState extends State<UsersPage> {
       // Si hay una imagen seleccionada, agregarla al cuerpo de la solicitud
       if (_image != null) {
         body['image'] = _image!.path;
+      } else {
+        // Si no hay una nueva imagen, enviar la URL de la imagen existente
+        body['image'] = _userImageUrl;
       }
 
       final response = await http.post(
