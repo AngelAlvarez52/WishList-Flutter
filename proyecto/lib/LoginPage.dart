@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:logger/logger.dart';
 import 'RegisterPage.dart';
 import 'MyHomePage.dart';
 import 'package:wave/config.dart';
 import 'package:wave/wave.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key, required this.title}) : super(key: key);
@@ -13,22 +14,50 @@ class LoginPage extends StatefulWidget {
   final String title;
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  LoginPageState createState() => LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _isRememberMeChecked = false;
   final Logger _logger = Logger();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRememberMeState();
+  }
+
+  void _loadRememberMeState() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+
+    setState(() {
+      _isRememberMeChecked = prefs.getBool('rememberMe') ?? false;
+      if (_isRememberMeChecked && isLoggedIn) {
+        final String email = prefs.getString('email') ?? '';
+        final String password = prefs.getString('password') ?? '';
+        if (email.isNotEmpty && password.isNotEmpty) {
+          _emailController.text = email;
+          _passwordController.text = password;
+          login(email, password);
+        }
+      }
+    });
+  }
+
+  void _saveRememberMeState(bool value) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('rememberMe', value);
+  }
 
   void _showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(message),
       action: SnackBarAction(
         label: 'OK',
-        onPressed: () {
-          ScaffoldMessenger.of(context).hideCurrentSnackBar();
-        },
+        onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
       ),
     ));
   }
@@ -45,29 +74,35 @@ class _LoginPageState extends State<LoginPage> {
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> data = json.decode(response.body);
-      _logger.d('Inicio de sesión exitoso: ${data['access token']}');
 
       if (data.containsKey('access token')) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) =>
-                MyHomePage(title: 'WishList', authToken: data['access token']),
-          ),
-        );
+        _logger.d('Login successful: ${data['access token']}');
+
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('accessToken', data['access token']);
+        await prefs.setString('email', email);
+        await prefs.setString('password', password);
+        await prefs.setBool('isLoggedIn', true);
+
+        if (_isRememberMeChecked) {
+          await prefs.setBool('rememberMe', true);
+        }
+
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MyHomePage(
+                  title: 'WishList', authToken: data['access token']),
+            ),
+          );
+          _clearFields(); // Limpia los campos después del login exitoso
+        }
       } else {
-        _logger.d('Error: Token de acceso no encontrado en la respuesta.');
-        _showSnackBar('Error desconocido durante el inicio de sesión.');
+        _showSnackBar('Unknown error during login.');
       }
     } else {
-      _logger.d('Error de inicio de sesión: ${response.body}');
-
-      final Map<String, dynamic> errorData = json.decode(response.body);
-      if (errorData['response'] != null) {
-        _showSnackBar('Usuario no existe: ${errorData['response']}');
-      } else {
-        _showSnackBar('Usuario no existe.');
-      }
+      _showSnackBar('Login failed.');
     }
   }
 
@@ -75,15 +110,22 @@ class _LoginPageState extends State<LoginPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => const RegisterPage(title: 'Registro')),
+          builder: (context) => const RegisterPage(title: 'Register')),
     );
+  }
+
+  void _clearFields() {
+    _emailController.clear();
+    _passwordController.clear();
+    setState(() {
+      _isRememberMeChecked = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blue, // Color del AppBar
         title: Text(widget.title),
       ),
       body: Stack(
@@ -95,14 +137,14 @@ class _LoginPageState extends State<LoginPage> {
                 [Colors.blue.shade200, Colors.blue.shade100],
               ],
               durations: [19440, 10800],
-              heightPercentages: [0.35, 0.36],
+              heightPercentages: [0.20, 0.25],
               gradientBegin: Alignment.bottomLeft,
               gradientEnd: Alignment.topRight,
             ),
             waveAmplitude: 0,
             size: const Size(double.infinity, double.infinity),
           ),
-          Padding(
+          SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -110,7 +152,7 @@ class _LoginPageState extends State<LoginPage> {
                 TextField(
                   controller: _emailController,
                   decoration: const InputDecoration(
-                    labelText: 'Correo electrónico',
+                    labelText: 'Email',
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -123,7 +165,7 @@ class _LoginPageState extends State<LoginPage> {
                   controller: _passwordController,
                   obscureText: true,
                   decoration: const InputDecoration(
-                    labelText: 'Contraseña',
+                    labelText: 'Password',
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -131,36 +173,43 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                 ),
+                CheckboxListTile(
+                  title: const Text("Mantener sesion iniciada"),
+                  value: _isRememberMeChecked,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      _isRememberMeChecked = value ?? false;
+                      _saveRememberMeState(_isRememberMeChecked);
+                    });
+                  },
+                  controlAffinity: ListTileControlAffinity.leading,
+                ),
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () {
-                    final String email = _emailController.text;
-                    final String password = _passwordController.text;
+                    final String email = _emailController.text.trim();
+                    final String password = _passwordController.text.trim();
                     if (email.isEmpty || password.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                        content: Text('Por favor complete todos los campos.'),
-                        duration: Duration(seconds: 2),
-                      ));
+                      _showSnackBar('Please fill in all fields.');
                     } else {
                       login(email, password);
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
+                    backgroundColor: Colors.blue,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: const Text(
-                    'Iniciar Sesión',
-                    style: TextStyle(color: Colors.blue),
-                  ),
+                  child: const Text('Login',
+                      style: TextStyle(color: Colors.white)),
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton.icon(
                   onPressed: _navigateToRegisterPage,
-                  icon: const Icon(Icons.person_add),
-                  label: const Text('Registrarse'),
+                  icon: const Icon(Icons.person_add, color: Colors.white),
+                  label: const Text('Register',
+                      style: TextStyle(color: Colors.white)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     shape: RoundedRectangleBorder(

@@ -48,11 +48,11 @@ class FriendPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 40),
-                _buildTextField("", nameController),
+                _buildTextField("Nombre", nameController),
                 const SizedBox(height: 20),
-                _buildTextField("", surnameController),
+                _buildTextField("Apellido", surnameController),
                 const SizedBox(height: 20),
-                _buildTextField("", phoneController),
+                _buildTextField("Teléfono", phoneController),
                 // Continúa agregando otros campos según sea necesario
                 _buildButton(context), // Agrega el botón aquí
               ],
@@ -78,10 +78,18 @@ class FriendPage extends StatelessWidget {
           ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide.none,
+            borderSide: const BorderSide(
+                color:
+                    Colors.blue), // Color de la línea alrededor del TextField
           ),
+          labelStyle: const TextStyle(
+              color: Colors.black), // Cambia el color del texto del label
+          hintStyle: const TextStyle(
+              color: Colors.grey), // Cambia el color del texto del hint
         ),
         enabled: false, // Cambiar a true si quieres que sea editable.
+        style: const TextStyle(
+            color: Colors.black), // Cambia el color del texto del TextField
       ),
     );
   }

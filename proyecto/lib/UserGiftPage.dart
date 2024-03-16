@@ -40,7 +40,7 @@ class UserGiftPageState extends State<UserGiftPage> {
   Future<List<Gift>> _fetchGifts() async {
     final userId = await getUserId();
     final response = await http.get(
-      Uri.parse('http://127.0.0.1:8000/api/Gifts?user_id=$userId'),
+      Uri.parse('http://127.0.0.1:8000/api/gitf_user?user_id=$userId'),
       headers: {
         'Authorization': 'Bearer ${widget.authToken}',
       },

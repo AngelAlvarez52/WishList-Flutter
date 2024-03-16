@@ -61,8 +61,8 @@ class GiftsPageState extends State<GiftsPage> {
   }
 
   Future<List<Gift>> _fetchGifts() async {
-    final response = await http.get(
-        Uri.parse('http://127.0.0.1:8000/api/Gifts/?user_id=${widget.userId}'));
+    final response = await http.get(Uri.parse(
+        'http://127.0.0.1:8000/api/gitf_user/?user_id=${widget.userId}'));
     if (response.statusCode == 200) {
       final List<dynamic> jsonData = jsonDecode(response.body);
       return jsonData.map((json) => Gift.fromJson(json)).toList();

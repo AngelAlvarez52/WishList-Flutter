@@ -22,7 +22,6 @@ dependencies:
   firebase_core: 
   firebase_auth: 
   cloud_firestore:
-  flutter_facebook_auth:
   firebase_storage: 
   cached_network_image:
   smooth_page_indicator: 

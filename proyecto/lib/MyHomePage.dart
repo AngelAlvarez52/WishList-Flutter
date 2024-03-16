@@ -1,10 +1,12 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:animated_card/animated_card.dart';
 import 'package:http/http.dart' as http;
+import 'package:animated_card/animated_card.dart';
 import 'FriendPage.dart';
 import 'ProfilePage.dart';
 import 'UserGiftPage.dart';
+import 'LoginPage.dart'; // Importa la página de inicio de sesión
+import 'package:shared_preferences/shared_preferences.dart'; // Importa SharedPreferences
 
 class MyHomePage extends StatefulWidget {
   final String title;
@@ -21,11 +23,13 @@ class _MyHomePageState extends State<MyHomePage> {
   late List<User> _users = [];
   final TextEditingController _searchController = TextEditingController();
   late List<User> _searchResults = [];
+  late BuildContext _context; // Variable para almacenar el BuildContext
 
   @override
   void initState() {
     super.initState();
     _getUsers();
+    _context = context; // Asigna el valor de context a _context
   }
 
   Future<void> _getUsers() async {
@@ -59,6 +63,45 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       _searchResults = searchResults;
     });
+  }
+
+  void _logout() async {
+    final url = Uri.parse('http://127.0.0.1:8000/api/logout');
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer ${widget.authToken}',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.remove('accessToken');
+      await prefs.remove('email');
+      await prefs.remove('password');
+      await prefs.remove('isLoggedIn');
+      await prefs.remove('rememberMe');
+
+      // ignore: use_build_context_synchronously
+      Navigator.pushReplacement(
+        _context, // Usa _context en lugar de context
+        MaterialPageRoute(
+          builder: (context) => const LoginPage(title: 'Login'),
+        ),
+      );
+    } else {
+      _showSnackBar('Logout failed.');
+    }
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(_context).showSnackBar(SnackBar(
+      content: Text(message),
+      action: SnackBarAction(
+        label: 'OK',
+        onPressed: () => ScaffoldMessenger.of(_context).hideCurrentSnackBar(),
+      ),
+    ));
   }
 
   @override
@@ -171,22 +214,8 @@ class _MyHomePageState extends State<MyHomePage> {
                           },
                         ),
                         OptionCard(
-                          title: 'Comentarios',
-                          onTap: () {
-                            // Implementa la lógica para Comentarios
-                          },
-                        ),
-                        OptionCard(
-                          title: 'Calificaciones',
-                          onTap: () {
-                            // Implementa la lógica para Calificaciones
-                          },
-                        ),
-                        OptionCard(
                           title: 'LogOut',
-                          onTap: () {
-                            // Implementa la lógica para LogOut
-                          },
+                          onTap: _logout,
                         ),
                       ],
                     ),
@@ -213,14 +242,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => FriendPage(
-                    userId: user
-                        .id, // Asegúrate de tener este campo en tu clase User
-                    userImageUrl: '', // URL de la imagen del usuario
+                    userId: user.id,
+                    userImageUrl: user.imageUrl,
                     nameController: TextEditingController(text: user.name),
                     surnameController:
                         TextEditingController(text: user.surname),
-                    emailController:
-                        TextEditingController(text: ''), // Si lo estás usando
+                    emailController: TextEditingController(text: user.email),
                     phoneController: TextEditingController(text: user.phone),
                   ),
                 ),
@@ -241,12 +268,16 @@ class User {
   final String surname;
   final int id;
   final String phone;
+  final String imageUrl;
+  final String email;
 
   User({
     required this.name,
     required this.surname,
     required this.id,
     required this.phone,
+    required this.imageUrl,
+    required this.email,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -255,6 +286,8 @@ class User {
       surname: json['surname'],
       id: json['id'],
       phone: json['phone'],
+      imageUrl: json['image'],
+      email: json['email'],
     );
   }
 }
