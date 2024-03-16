@@ -86,7 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
       Navigator.pushReplacement(
         _context, // Usa _context en lugar de context
         MaterialPageRoute(
-          builder: (context) => const LoginPage(title: 'Login'),
+          builder: (context) => const LoginPage(title: 'WishList'),
         ),
       );
     } else {

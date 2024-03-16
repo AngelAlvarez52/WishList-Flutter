@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
+import 'GiftAddPage.dart';
 
 class UserGiftPage extends StatefulWidget {
   final String authToken;
@@ -59,6 +60,26 @@ class UserGiftPageState extends State<UserGiftPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_selectedGift != null ? _selectedGift!.name : 'User Gifts'),
+        actions: <Widget>[
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () async {
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      GiftAddPage(authToken: widget.authToken),
+                ),
+              );
+              // If a gift was added, refresh the list
+              if (result == true) {
+                setState(() {
+                  _giftsFuture = _fetchGifts();
+                });
+              }
+            },
+          ),
+        ],
       ),
       body: _selectedGift != null ? _buildGiftDetails() : _buildGiftsList(),
     );

@@ -76,7 +76,7 @@ class GiftsPageState extends State<GiftsPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.secondary,
-        title: Text(_selectedGift != null ? _selectedGift!.name : 'Gifts'),
+        title: Text(_selectedGift != null ? _selectedGift!.name : 'Sus deseos'),
       ),
       body: _selectedGift != null ? _buildGiftDetails() : _buildGiftsList(),
     );
