@@ -322,7 +322,49 @@ class UserGiftPageState extends State<UserGiftPage> {
               ),
             ],
           ),
+          const SizedBox(height: 20),
+          const Text(
+            'Calificación:',
+            style: TextStyle(
+              fontSize: 16,
+            ),
+          ),
+          FutureBuilder<int?>(
+            future: _fetchRating(
+                _selectedGift!.id, _currentUser.id, widget.authToken),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const CircularProgressIndicator();
+              } else if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              } else {
+                final int? rating = snapshot.data;
+                return _buildStarRating(rating ?? 0);
+              }
+            },
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildStarRating(int rating) {
+    return Row(
+      children: List.generate(
+        5,
+        (index) {
+          IconData iconData = index < rating ? Icons.star : Icons.star_border;
+          Color iconColor = index < rating ? Colors.amber : Colors.grey;
+          return IconButton(
+            onPressed: () {
+              _postRating(index + 1);
+            },
+            icon: Icon(
+              iconData,
+              color: iconColor,
+            ),
+          );
+        },
       ),
     );
   }
@@ -566,6 +608,29 @@ class UserGiftPageState extends State<UserGiftPage> {
       throw Exception('Failed to update comment');
     }
   }
+
+  Future<void> _postRating(int rating) async {
+    final userId = await getUserId();
+    final response = await http.post(
+      Uri.parse('http://127.0.0.1:8000/api/Ratings/create'),
+      headers: {
+        'Authorization': 'Bearer ${widget.authToken}',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'rating': rating,
+        'user_id': userId,
+        'gift_id': _selectedGift!.id,
+      }),
+    );
+    if (response.statusCode == 200) {
+      setState(() {
+        _selectedGift!.rating = rating; // Actualiza la calificación localmente
+      });
+    } else {
+      throw Exception('Failed to post rating');
+    }
+  }
 }
 
 class Gift {
@@ -575,6 +640,7 @@ class Gift {
   final String url;
   final double price;
   final String image;
+  int? rating;
 
   Gift({
     required this.id,
@@ -583,6 +649,7 @@ class Gift {
     required this.url,
     required this.price,
     required this.image,
+    this.rating,
   });
 
   factory Gift.fromJson(Map<String, dynamic> json) {
@@ -593,6 +660,7 @@ class Gift {
       url: json['url'],
       price: double.parse(json['price'].toString()),
       image: json['image'],
+      rating: json['rating'],
     );
   }
 }
@@ -634,5 +702,26 @@ class User {
       name: json['name'],
       surname: json['surname'],
     );
+  }
+}
+
+Future<int?> _fetchRating(int giftId, int userId, String authToken) async {
+  final response = await http.get(
+    Uri.parse('http://127.0.0.1:8000/api/rating_gift?gift_id=$giftId'),
+    headers: {
+      'Authorization': 'Bearer $authToken',
+    },
+  );
+  if (response.statusCode == 200) {
+    final List<dynamic> jsonData = jsonDecode(response.body);
+    for (var ratingData in jsonData) {
+      final rating = ratingData as Map<String, dynamic>;
+      if (rating['user_id'] == userId) {
+        return rating['rating'];
+      }
+    }
+    return null;
+  } else {
+    throw Exception('Failed to load rating');
   }
 }
