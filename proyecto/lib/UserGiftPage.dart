@@ -18,12 +18,40 @@ class UserGiftPage extends StatefulWidget {
 class UserGiftPageState extends State<UserGiftPage> {
   late Future<List<Gift>> _giftsFuture;
   Gift? _selectedGift;
+  late User _currentUser;
   final Logger _logger = Logger();
+  late TextEditingController _controller;
 
   @override
   void initState() {
     super.initState();
     _giftsFuture = _fetchGifts();
+    _fetchCurrentUser();
+    _controller = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _fetchCurrentUser() async {
+    final userId = await getUserId();
+    final response = await http.get(
+      Uri.parse('http://127.0.0.1:8000/api/Users/$userId'),
+      headers: {
+        'Authorization': 'Bearer ${widget.authToken}',
+      },
+    );
+    if (response.statusCode == 200) {
+      final jsonData = jsonDecode(response.body);
+      setState(() {
+        _currentUser = User.fromJson(jsonData);
+      });
+    } else {
+      throw Exception('Failed to load current user');
+    }
   }
 
   Future<int> getUserId() async {
@@ -301,7 +329,9 @@ class UserGiftPageState extends State<UserGiftPage> {
 
   Widget _buildCommentsSection() {
     return FutureBuilder<List<Comment>>(
-      future: _fetchComments(_selectedGift!.id),
+      future: _selectedGift != null
+          ? _fetchComments(_selectedGift!.id)
+          : Future.value([]),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -322,14 +352,95 @@ class UserGiftPageState extends State<UserGiftPage> {
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: List.generate(comments.length, (index) {
-                      final comment = comments[index];
-                      final user = users[index];
-                      return ListTile(
-                        title: Text('${user.name} ${user.surname}'),
-                        subtitle: Text(comment.text),
-                      );
-                    }),
+                    children: [
+                      ...List.generate(comments.length, (index) {
+                        final comment = comments[index];
+                        final user = users[index];
+                        bool isCurrentUserComment =
+                            comment.userId == _currentUser.id;
+                        return ListTile(
+                          title: Text('${user.name} ${user.surname}'),
+                          subtitle: Text(comment.text),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (isCurrentUserComment)
+                                IconButton(
+                                  icon: const Icon(Icons.edit),
+                                  onPressed: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        TextEditingController controller =
+                                            TextEditingController(
+                                                text: comment.text);
+                                        return AlertDialog(
+                                          title:
+                                              const Text('Editar Comentario'),
+                                          content: TextField(
+                                            controller: controller,
+                                            onChanged: (text) {},
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.of(context).pop();
+                                              },
+                                              child: const Text('Cancelar'),
+                                            ),
+                                            TextButton(
+                                              onPressed: () {
+                                                editarComentario(comment.id,
+                                                    controller.text);
+                                                Navigator.of(context).pop();
+                                              },
+                                              child: const Text('Guardar'),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                  },
+                                ),
+                              if (isCurrentUserComment)
+                                IconButton(
+                                  icon: const Icon(Icons.delete),
+                                  onPressed: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          title:
+                                              const Text('Eliminar Comentario'),
+                                          content: const Text(
+                                              '¿Estás seguro de que deseas eliminar este comentario?'),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.of(context).pop();
+                                              },
+                                              child: const Text('Cancelar'),
+                                            ),
+                                            TextButton(
+                                              onPressed: () {
+                                                eliminarComentario(comment.id);
+                                                Navigator.of(context).pop();
+                                              },
+                                              child: const Text('Eliminar'),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                  },
+                                ),
+                            ],
+                          ),
+                        );
+                      }),
+                      const SizedBox(height: 20),
+                      _buildCommentForm(),
+                    ],
                   ),
                 );
               }
@@ -338,6 +449,66 @@ class UserGiftPageState extends State<UserGiftPage> {
         }
       },
     );
+  }
+
+  Widget _buildCommentForm() {
+    return Container(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text(
+            'Añadir Comentario',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            controller: _controller,
+            decoration: const InputDecoration(
+              hintText: 'Escribe tu comentario aquí',
+              border: OutlineInputBorder(),
+            ),
+            onChanged: (text) {},
+            onSubmitted: (text) {
+              _postComment(text);
+            },
+          ),
+          const SizedBox(height: 10),
+          ElevatedButton(
+            onPressed: () {
+              _postComment(_controller.text);
+            },
+            child: const Text('Enviar Comentario'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _postComment(String text) async {
+    final userId = await getUserId();
+    final response = await http.post(
+      Uri.parse('http://127.0.0.1:8000/api/Comments/create'),
+      headers: {
+        'Authorization': 'Bearer ${widget.authToken}',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'text': text,
+        'user_id': userId,
+        'gift_id': _selectedGift!.id,
+      }),
+    );
+    if (response.statusCode == 200) {
+      setState(() {
+        _fetchComments(_selectedGift!.id);
+      });
+    } else {
+      throw Exception('Failed to post comment');
+    }
   }
 
   void _launchURL(String url) async {
@@ -351,9 +522,48 @@ class UserGiftPageState extends State<UserGiftPage> {
 
   void _loadComments(int giftId) async {
     try {
-      setState(() {});
+      setState(() {
+        _fetchComments(giftId);
+      });
     } catch (e) {
       _logger.e('Error loading comments: $e');
+    }
+  }
+
+  Future<void> eliminarComentario(int commentId) async {
+    final response = await http.delete(
+      Uri.parse('http://127.0.0.1:8000/api/comments/delete/$commentId'),
+      headers: {
+        'Authorization': 'Bearer ${widget.authToken}',
+      },
+    );
+    if (response.statusCode == 200) {
+      setState(() {
+        _fetchComments(_selectedGift!.id);
+      });
+    } else {
+      throw Exception('Failed to delete comment');
+    }
+  }
+
+  Future<void> editarComentario(int commentId, String newText) async {
+    final response = await http.post(
+      Uri.parse('http://127.0.0.1:8000/api/Comments/$commentId/update'),
+      headers: {
+        'Authorization': 'Bearer ${widget.authToken}',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'id': commentId,
+        'text': newText,
+      }),
+    );
+    if (response.statusCode == 200) {
+      setState(() {
+        _fetchComments(_selectedGift!.id);
+      });
+    } else {
+      throw Exception('Failed to update comment');
     }
   }
 }
@@ -388,16 +598,19 @@ class Gift {
 }
 
 class Comment {
+  final int id;
   final int userId;
   final String text;
 
   Comment({
+    required this.id,
     required this.userId,
     required this.text,
   });
 
   factory Comment.fromJson(Map<String, dynamic> json) {
     return Comment(
+      id: json['id'],
       userId: json['user_id'],
       text: json['text'],
     );
@@ -405,16 +618,19 @@ class Comment {
 }
 
 class User {
+  final int id;
   final String name;
   final String surname;
 
   User({
+    required this.id,
     required this.name,
     required this.surname,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
+      id: json['id'],
       name: json['name'],
       surname: json['surname'],
     );
