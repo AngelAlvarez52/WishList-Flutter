@@ -641,6 +641,7 @@ class Gift {
   final double price;
   final String image;
   int? rating;
+  int? ratingId;
 
   Gift({
     required this.id,
@@ -650,6 +651,7 @@ class Gift {
     required this.price,
     required this.image,
     this.rating,
+    this.ratingId,
   });
 
   factory Gift.fromJson(Map<String, dynamic> json) {
@@ -661,6 +663,7 @@ class Gift {
       price: double.parse(json['price'].toString()),
       image: json['image'],
       rating: json['rating'],
+      ratingId: json['rating_id'],
     );
   }
 }

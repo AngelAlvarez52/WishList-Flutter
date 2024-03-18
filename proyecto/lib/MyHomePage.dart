@@ -243,12 +243,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 MaterialPageRoute(
                   builder: (context) => FriendPage(
                     userId: user.id,
-                    userImageUrl: user.imageUrl,
-                    nameController: TextEditingController(text: user.name),
-                    surnameController:
-                        TextEditingController(text: user.surname),
-                    emailController: TextEditingController(text: user.email),
-                    phoneController: TextEditingController(text: user.phone),
+                    authToken: widget.authToken,
                   ),
                 ),
               );
