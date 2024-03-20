@@ -45,7 +45,7 @@ class UsersPageState extends State<UsersPage> {
 
   Future<void> _fetchUserData() async {
     final response = await http.get(
-      Uri.parse('http://127.0.0.1:8000/api/userprofile'),
+      Uri.parse('https://alvarez.terrabyteco.com/api/userprofile'),
       headers: {
         'Authorization': 'Bearer ${widget.authToken}',
       },
@@ -73,7 +73,8 @@ class UsersPageState extends State<UsersPage> {
         _isEditing = true;
       });
     } else {
-      final apiUrl = 'http://127.0.0.1:8000/api/Users/$_userId/update';
+      final apiUrl =
+          'https://alvarez.terrabyteco.com/api/Users/$_userId/update';
 
       // Construir el cuerpo de la solicitud
       final Map<String, String> body = {
@@ -84,11 +85,11 @@ class UsersPageState extends State<UsersPage> {
         'phone': _phoneController.text,
       };
 
-      // Si hay una imagen seleccionada, agregarla al cuerpo de la solicitud
       if (_image != null) {
-        body['image'] = _image!.path;
+        final bytes = await _image!.readAsBytes();
+        final String base64Image = base64Encode(bytes);
+        body['image'] = base64Image;
       } else {
-        // Si no hay una nueva imagen, enviar la URL de la imagen existente
         body['image'] = _userImageUrl;
       }
 

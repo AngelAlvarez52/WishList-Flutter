@@ -84,7 +84,7 @@ class GiftsPageState extends State<GiftsPage> {
 
   Future<List<Gift>> _fetchGifts() async {
     final response = await http.get(Uri.parse(
-        'http://127.0.0.1:8000/api/gitf_user/?user_id=${widget.userId}'));
+        'https://alvarez.terrabyteco.com/api/gitf_user/?user_id=${widget.userId}'));
     if (response.statusCode == 200) {
       final List<dynamic> jsonData = jsonDecode(response.body);
       return jsonData.map((json) => Gift.fromJson(json)).toList();
@@ -94,8 +94,8 @@ class GiftsPageState extends State<GiftsPage> {
   }
 
   Future<int?> _fetchGiftRating(int giftId) async {
-    final response = await http.get(
-        Uri.parse('http://127.0.0.1:8000/api/rating_gift?gift_id=$giftId'));
+    final response = await http.get(Uri.parse(
+        'https://alvarez.terrabyteco.com/api/rating_gift?gift_id=$giftId'));
     if (response.statusCode == 200) {
       final List<dynamic> jsonData = jsonDecode(response.body);
       if (jsonData.isNotEmpty) {
@@ -112,7 +112,8 @@ class GiftsPageState extends State<GiftsPage> {
 
   Future<List<Comment>> _fetchComments(int giftId) async {
     final response = await http.get(
-      Uri.parse('http://127.0.0.1:8000/api/comments_gift?gift_id=$giftId'),
+      Uri.parse(
+          'https://alvarez.terrabyteco.com/api/comments_gift?gift_id=$giftId'),
       headers: {
         'Authorization': 'Bearer ${widget.authToken}',
       },
@@ -128,7 +129,7 @@ class GiftsPageState extends State<GiftsPage> {
 
   Future<User> _fetchUser(int userId) async {
     final response = await http.get(
-      Uri.parse('http://127.0.0.1:8000/api/Users/$userId'),
+      Uri.parse('https://alvarez.terrabyteco.com/api/Users/$userId'),
     );
     if (response.statusCode == 200) {
       final Map<String, dynamic> jsonData = jsonDecode(response.body);
@@ -139,7 +140,7 @@ class GiftsPageState extends State<GiftsPage> {
   }
 
   Future<void> _postComment(String text) async {
-    const url = 'http://127.0.0.1:8000/api/Comments/create';
+    const url = 'https://alvarez.terrabyteco.com/api/Comments/create';
 
     // Obtener el user_id del método getUserId()
     int userId = await getUserId();
@@ -170,7 +171,7 @@ class GiftsPageState extends State<GiftsPage> {
 
   Future<int> getUserId() async {
     final response = await http.get(
-      Uri.parse('http://127.0.0.1:8000/api/userprofile'),
+      Uri.parse('https://alvarez.terrabyteco.com/api/userprofile'),
       headers: {
         'Authorization': 'Bearer ${widget.authToken}',
       },
@@ -332,7 +333,8 @@ class GiftsPageState extends State<GiftsPage> {
 
   Future<void> editarComentario(int commentId, String newText) async {
     final response = await http.post(
-      Uri.parse('http://127.0.0.1:8000/api/Comments/$commentId/update'),
+      Uri.parse(
+          'https://alvarez.terrabyteco.com/api/Comments/$commentId/update'),
       headers: {
         'Authorization': 'Bearer ${widget.authToken}',
         'Content-Type': 'application/json',
@@ -545,7 +547,7 @@ class User {
 }
 
 Future<void> eliminarComentario(int commentId) async {
-  final url = 'http://127.0.0.1:8000/api/comments/delete/$commentId';
+  final url = 'https://alvarez.terrabyteco.com/api/comments/delete/$commentId';
   final response = await http.delete(Uri.parse(url));
   if (response.statusCode == 200) {
     // Comentario eliminado correctamente, no necesitas actualizar el estado aquí

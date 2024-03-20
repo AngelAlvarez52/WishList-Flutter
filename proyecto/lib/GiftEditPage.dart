@@ -39,8 +39,8 @@ class GiftEditPageState extends State<GiftEditPage> {
   }
 
   Future<Map<String, dynamic>> _fetchGiftData() async {
-    final response = await http
-        .get(Uri.parse('http://127.0.0.1:8000/api/Gifts/${widget.giftId}'));
+    final response = await http.get(Uri.parse(
+        'https://alvarez.terrabyteco.com/api/Gifts/${widget.giftId}'));
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
@@ -50,8 +50,8 @@ class GiftEditPageState extends State<GiftEditPage> {
   }
 
   Future<void> _fetchCategories() async {
-    final response =
-        await http.get(Uri.parse('http://127.0.0.1:8000/api/categories'));
+    final response = await http
+        .get(Uri.parse('https://alvarez.terrabyteco.com/api/categories'));
 
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
@@ -66,7 +66,7 @@ class GiftEditPageState extends State<GiftEditPage> {
 
   Future<void> _fetchShops() async {
     final response =
-        await http.get(Uri.parse('http://127.0.0.1:8000/api/Shops'));
+        await http.get(Uri.parse('https://alvarez.terrabyteco.com/api/Shops'));
 
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
@@ -79,8 +79,8 @@ class GiftEditPageState extends State<GiftEditPage> {
   }
 
   Future<void> _updateGift() async {
-    final url =
-        Uri.parse('http://127.0.0.1:8000/api/Gifts/${widget.giftId}/update');
+    final url = Uri.parse(
+        'https://alvarez.terrabyteco.com/api/Gifts/${widget.giftId}/update');
 
     final request = http.MultipartRequest('POST', url);
     request.headers.addAll({

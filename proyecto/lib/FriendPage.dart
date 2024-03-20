@@ -44,7 +44,7 @@ class FriendPageState extends State<FriendPage> {
 
   Future<void> _fetchUserData() async {
     final response = await http.get(
-      Uri.parse('http://127.0.0.1:8000/api/Users/${widget.userId}'),
+      Uri.parse('https://alvarez.terrabyteco.com/api/Users/${widget.userId}'),
     );
 
     if (response.statusCode == 200) {

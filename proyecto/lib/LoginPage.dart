@@ -63,7 +63,7 @@ class LoginPageState extends State<LoginPage> {
   }
 
   Future<void> login(String email, String password) async {
-    final url = Uri.parse('http://127.0.0.1:8000/api/login');
+    final url = Uri.parse('https://alvarez.terrabyteco.com/api/login');
     final response = await http.post(
       url,
       headers: {'Accept': 'application/json'},

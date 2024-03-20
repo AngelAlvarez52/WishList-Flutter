@@ -34,7 +34,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> _getUsers() async {
     final response =
-        await http.get(Uri.parse('http://127.0.0.1:8000/api/Users'));
+        await http.get(Uri.parse('https://alvarez.terrabyteco.com/api/Users'));
     if (response.statusCode == 200) {
       setState(() {
         _users = (json.decode(response.body) as List)
@@ -66,7 +66,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _logout() async {
-    final url = Uri.parse('http://127.0.0.1:8000/api/logout');
+    final url = Uri.parse('https://alvarez.terrabyteco.com/api/logout');
     final response = await http.post(
       url,
       headers: {

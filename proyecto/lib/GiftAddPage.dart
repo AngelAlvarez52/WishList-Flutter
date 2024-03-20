@@ -36,7 +36,7 @@ class GiftAddPageState extends State<GiftAddPage> {
 
   Future<int> _getUserId() async {
     final response = await http.get(
-      Uri.parse('http://127.0.0.1:8000/api/userprofile'),
+      Uri.parse('https://alvarez.terrabyteco.com/api/userprofile'),
       headers: {
         'Authorization': 'Bearer ${widget.authToken}',
       },
@@ -50,8 +50,8 @@ class GiftAddPageState extends State<GiftAddPage> {
   }
 
   Future<void> _fetchCategories() async {
-    final response =
-        await http.get(Uri.parse('http://127.0.0.1:8000/api/categories'));
+    final response = await http
+        .get(Uri.parse('https://alvarez.terrabyteco.com/api/categories'));
 
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
@@ -66,7 +66,7 @@ class GiftAddPageState extends State<GiftAddPage> {
 
   Future<void> _fetchShops() async {
     final response =
-        await http.get(Uri.parse('http://127.0.0.1:8000/api/Shops'));
+        await http.get(Uri.parse('https://alvarez.terrabyteco.com/api/Shops'));
 
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
@@ -80,7 +80,7 @@ class GiftAddPageState extends State<GiftAddPage> {
 
   Future<void> _addGift() async {
     final userId = await _userIdFuture;
-    final url = Uri.parse('http://127.0.0.1:8000/api/Gifts/create');
+    final url = Uri.parse('https://alvarez.terrabyteco.com/api/Gifts/create');
 
     final request = http.MultipartRequest('POST', url);
     request.headers.addAll({

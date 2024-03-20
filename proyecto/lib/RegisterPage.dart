@@ -27,7 +27,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
   Future<void> register(String name, String surname, String email, String phone,
       String password) async {
-    final url = Uri.parse('http://127.0.0.1:8000/api/Users/create');
+    final url = Uri.parse('https://alvarez.terrabyteco.com/api/Users/create');
     final response = await http.post(
       url,
       headers: {'Accept': 'application/json'},

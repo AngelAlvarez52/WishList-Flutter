@@ -39,7 +39,7 @@ class UserGiftPageState extends State<UserGiftPage> {
   Future<void> _fetchCurrentUser() async {
     final userId = await getUserId();
     final response = await http.get(
-      Uri.parse('http://127.0.0.1:8000/api/Users/$userId'),
+      Uri.parse('https://alvarez.terrabyteco.com/api/Users/$userId'),
       headers: {
         'Authorization': 'Bearer ${widget.authToken}',
       },
@@ -56,7 +56,7 @@ class UserGiftPageState extends State<UserGiftPage> {
 
   Future<int> getUserId() async {
     final response = await http.get(
-      Uri.parse('http://127.0.0.1:8000/api/userprofile'),
+      Uri.parse('https://alvarez.terrabyteco.com/api/userprofile'),
       headers: {
         'Authorization': 'Bearer ${widget.authToken}',
       },
@@ -72,7 +72,8 @@ class UserGiftPageState extends State<UserGiftPage> {
   Future<List<Gift>> _fetchGifts() async {
     final userId = await getUserId();
     final response = await http.get(
-      Uri.parse('http://127.0.0.1:8000/api/gitf_user?user_id=$userId'),
+      Uri.parse(
+          'https://alvarez.terrabyteco.com/api/gitf_user?user_id=$userId'),
       headers: {
         'Authorization': 'Bearer ${widget.authToken}',
       },
@@ -88,7 +89,8 @@ class UserGiftPageState extends State<UserGiftPage> {
 
   Future<List<Comment>> _fetchComments(int giftId) async {
     final response = await http.get(
-      Uri.parse('http://127.0.0.1:8000/api/comments_gift?gift_id=$giftId'),
+      Uri.parse(
+          'https://alvarez.terrabyteco.com/api/comments_gift?gift_id=$giftId'),
       headers: {
         'Authorization': 'Bearer ${widget.authToken}',
       },
@@ -112,7 +114,7 @@ class UserGiftPageState extends State<UserGiftPage> {
 
   Future<User> _fetchUser(int userId) async {
     final response = await http.get(
-      Uri.parse('http://127.0.0.1:8000/api/Users/$userId'),
+      Uri.parse('https://alvarez.terrabyteco.com/api/Users/$userId'),
       headers: {
         'Authorization': 'Bearer ${widget.authToken}',
       },
@@ -128,7 +130,7 @@ class UserGiftPageState extends State<UserGiftPage> {
 
   Future<void> eliminarRegalo(int giftId) async {
     final response = await http.delete(
-      Uri.parse('http://127.0.0.1:8000/api/Gifts/delete/$giftId'),
+      Uri.parse('https://alvarez.terrabyteco.com/api/Gifts/delete/$giftId'),
       headers: {
         'Authorization': 'Bearer ${widget.authToken}',
       },
@@ -533,7 +535,7 @@ class UserGiftPageState extends State<UserGiftPage> {
   Future<void> _postComment(String text) async {
     final userId = await getUserId();
     final response = await http.post(
-      Uri.parse('http://127.0.0.1:8000/api/Comments/create'),
+      Uri.parse('https://alvarez.terrabyteco.com/api/Comments/create'),
       headers: {
         'Authorization': 'Bearer ${widget.authToken}',
         'Content-Type': 'application/json',
@@ -574,7 +576,8 @@ class UserGiftPageState extends State<UserGiftPage> {
 
   Future<void> eliminarComentario(int commentId) async {
     final response = await http.delete(
-      Uri.parse('http://127.0.0.1:8000/api/comments/delete/$commentId'),
+      Uri.parse(
+          'https://alvarez.terrabyteco.com/api/comments/delete/$commentId'),
       headers: {
         'Authorization': 'Bearer ${widget.authToken}',
       },
@@ -590,7 +593,8 @@ class UserGiftPageState extends State<UserGiftPage> {
 
   Future<void> editarComentario(int commentId, String newText) async {
     final response = await http.post(
-      Uri.parse('http://127.0.0.1:8000/api/Comments/$commentId/update'),
+      Uri.parse(
+          'https://alvarez.terrabyteco.com/api/Comments/$commentId/update'),
       headers: {
         'Authorization': 'Bearer ${widget.authToken}',
         'Content-Type': 'application/json',
@@ -612,7 +616,7 @@ class UserGiftPageState extends State<UserGiftPage> {
   Future<void> _postRating(int rating) async {
     final userId = await getUserId();
     final response = await http.post(
-      Uri.parse('http://127.0.0.1:8000/api/Ratings/create'),
+      Uri.parse('https://alvarez.terrabyteco.com/api/Ratings/create'),
       headers: {
         'Authorization': 'Bearer ${widget.authToken}',
         'Content-Type': 'application/json',
@@ -710,7 +714,8 @@ class User {
 
 Future<int?> _fetchRating(int giftId, int userId, String authToken) async {
   final response = await http.get(
-    Uri.parse('http://127.0.0.1:8000/api/rating_gift?gift_id=$giftId'),
+    Uri.parse(
+        'https://alvarez.terrabyteco.com/api/rating_gift?gift_id=$giftId'),
     headers: {
       'Authorization': 'Bearer $authToken',
     },
